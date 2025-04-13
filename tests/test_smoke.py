@@ -18,34 +18,40 @@ class TestSmoke():
     options.add_argument("--headless=new")
     self.driver = webdriver.Chrome(options=options)
     self.vars = {}
+    # Add implicit wait
+    self.driver.implicitly_wait(10)
+    # Create wait object for explicit waits
+    self.wait = WebDriverWait(self.driver, 10)
   
   def teardown_method(self, method):
     self.driver.quit()
   
   def test_smoke(self):
-    self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
-    self.driver.set_window_size(1936, 1048)
-    self.driver.find_element(By.LINK_TEXT, "Home").click()
-    self.driver.find_element(By.LINK_TEXT, "Join Us").click()
-    self.driver.find_element(By.LINK_TEXT, "Directory").click()
-    self.driver.find_element(By.ID, "directory-grid").click()
-    self.driver.find_element(By.ID, "directory-list").click()
-    self.driver.find_element(By.LINK_TEXT, "Join").click()
-    self.driver.find_element(By.NAME, "fname").click()
-    self.driver.find_element(By.NAME, "fname").send_keys("matt")
-    self.driver.find_element(By.NAME, "lname").click()
-    self.driver.find_element(By.NAME, "lname").send_keys("felber")
-    self.driver.find_element(By.NAME, "bizname").click()
-    self.driver.find_element(By.NAME, "bizname").send_keys("ios")
-    self.driver.find_element(By.NAME, "biztitle").click()
-    self.driver.find_element(By.NAME, "biztitle").send_keys("devo")
-    self.driver.find_element(By.NAME, "submit").click()
-    self.driver.find_element(By.NAME, "email").click()
-    self.driver.find_element(By.LINK_TEXT, "Admin").click()
-    self.driver.find_element(By.ID, "username").click()
-    self.driver.find_element(By.ID, "username").send_keys("incorrect")
-    self.driver.find_element(By.ID, "password").click()
-    self.driver.find_element(By.ID, "password").send_keys("incorrect")
-    self.driver.find_element(By.CSS_SELECTOR, ".mysubmit:nth-child(4)").click()
-    self.driver.find_element(By.CSS_SELECTOR, "html").click()
-  
+    try:
+      self.driver.get("http://127.0.0.1:5500/teton/1.6/index.html")
+      self.driver.set_window_size(1936, 1048)
+      
+      # Add explicit waits for elements
+      self.wait.until(expected_conditions.element_to_be_clickable((By.LINK_TEXT, "Home"))).click()
+      self.wait.until(expected_conditions.element_to_be_clickable((By.LINK_TEXT, "Join Us"))).click()
+      self.wait.until(expected_conditions.element_to_be_clickable((By.LINK_TEXT, "Directory"))).click()
+      self.wait.until(expected_conditions.element_to_be_clickable((By.ID, "directory-grid"))).click()
+      self.wait.until(expected_conditions.element_to_be_clickable((By.ID, "directory-list"))).click()
+      self.wait.until(expected_conditions.element_to_be_clickable((By.LINK_TEXT, "Join"))).click()
+      
+      # Form filling
+      self.wait.until(expected_conditions.presence_of_element_located((By.NAME, "fname"))).send_keys("matt")
+      self.wait.until(expected_conditions.presence_of_element_located((By.NAME, "lname"))).send_keys("felber")
+      self.wait.until(expected_conditions.presence_of_element_located((By.NAME, "bizname"))).send_keys("ios")
+      self.wait.until(expected_conditions.presence_of_element_located((By.NAME, "biztitle"))).send_keys("devo")
+      self.wait.until(expected_conditions.element_to_be_clickable((By.NAME, "submit"))).click()
+      
+      # Admin section
+      self.wait.until(expected_conditions.element_to_be_clickable((By.LINK_TEXT, "Admin"))).click()
+      self.wait.until(expected_conditions.presence_of_element_located((By.ID, "username"))).send_keys("incorrect")
+      self.wait.until(expected_conditions.presence_of_element_located((By.ID, "password"))).send_keys("incorrect")
+      self.wait.until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, ".mysubmit:nth-child(4)"))).click()
+      
+    except Exception as e:
+      print(f"Test failed with error: {str(e)}")
+      raise
